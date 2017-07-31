@@ -39,6 +39,11 @@ func NewApi(bindAddress string, dbPath string) *Api {
 	g.POST("/login", a.Login)
 	g.POST("/signup", a.SignUp)
 
+	g.GET("/posts", a.GetPosts)
+	g.POST("/posts", a.CreatePost)
+	g.PATCH("/posts/:id", a.UpdatePost)
+	g.DELETE("/posts/:id", a.DeletePost)
+
 	a.bindAddress = bindAddress
 	return a
 }
