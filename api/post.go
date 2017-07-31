@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"net/http"
 	"github.com/masaliev/facebook_mini/db"
+	"time"
 )
 
 type (
@@ -56,6 +57,7 @@ func (a *Api) CreatePost(c echo.Context) error {
 	post := &db.Post{
 		Text: p.Text,
 		UserId: userId,
+		CreateDate: time.Now(),
 	}
 
 	if err := a.dataStorage.SavePost(post); err != nil{

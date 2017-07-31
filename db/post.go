@@ -4,6 +4,7 @@ package db
 import (
 	"github.com/russross/meddler"
 	"strconv"
+	"time"
 )
 
 type Post struct {
@@ -12,7 +13,7 @@ type Post struct {
 	UserId int `json:"user_id" meddler:"user_id"`
 	CommentsCount int `json:"comments_count" meddler:"comments_count"`
 	LikeCount int `json:"like_count" meddler:"like_count"`
-	CreateDate int `json:"create_date" meddler:"create_date"`
+	CreateDate time.Time `json:"create_date" meddler:"create_date,localtime"`
 }
 
 type PostSortType int
