@@ -19,10 +19,7 @@ func (a *Api) Like (c echo.Context) error {
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Bad Request"}
 	}
 
-	err, isLiked := a.dataStorage.IsLiked(l.UserId, l.PostId)
-	if err != nil{
-		return err
-	}
+	isLiked := a.dataStorage.IsLiked(l.UserId, l.PostId)
 
 	if isLiked{
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Allready like"}
@@ -44,15 +41,11 @@ func (a *Api) UnLike (c echo.Context) error {
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Bad Request"}
 	}
 
-	err, isLiked := a.dataStorage.IsLiked(userId, postId)
-	if err != nil{
-		return err
-	}
-
+	isLiked := a.dataStorage.IsLiked(userId, postId)
 	if !isLiked{
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Like not found"}
 	}
-	err = a.dataStorage.Unlike(userId, postId)
+	err := a.dataStorage.Unlike(userId, postId)
 	if err != nil{
 		return err
 	}
