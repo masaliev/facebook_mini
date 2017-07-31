@@ -6,6 +6,7 @@ import (
 	"github.com/masaliev/facebook_mini/db"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
+	"strings"
 )
 
 type Api struct {
@@ -24,6 +25,19 @@ func NewApi(bindAddress string, dbPath string) *Api {
 	a.echo = echo.New()
 	a.echo.Logger.SetLevel(log.ERROR)
 	a.echo.Use(middleware.Logger())
+
+	a.echo.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey: []byte(Key),
+		Skipper: func(c echo.Context) bool{
+			path := c.Path()
+			return strings.Contains(path, "/login") || strings.Contains(path, "/signup")
+		},
+	}))
+
+	g := a.echo.Group("/api/v1")
+
+	g.POST("/login", a.Login)
+	g.POST("/signup", a.SignUp)
 
 	a.bindAddress = bindAddress
 	return a
