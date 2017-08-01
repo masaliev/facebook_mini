@@ -48,6 +48,11 @@ func NewApi(bindAddress string, dbPath string) *Api {
 	g.POST("/like", a.Like)
 	g.DELETE("/unlike/:post_id", a.UnLike)
 
+	g.GET("/posts/:postId/comments", a.GetComments)
+	g.POST("/posts/:postId/comments", a.AddComment)
+	g.PATCH("/posts/:postId/comments/:id", a.UpdateComment)
+	g.DELETE("/posts/:postId/comments/:id", a.DeleteComment)
+
 	a.bindAddress = bindAddress
 	return a
 }
