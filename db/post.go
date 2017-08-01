@@ -39,7 +39,11 @@ const (
 
 
 func (s *DataStorage) SavePost(post *Post) error  {
-	return meddler.Insert(s.db, "posts", post)
+	if post.ID == 0 {
+		return meddler.Insert(s.db, "posts", post)
+	}else {
+		return meddler.Update(s.db, "posts", post)
+	}
 }
 
 func (s *DataStorage) GetPosts(sort PostSortType, page int) (error, []*PostVerbose) {
