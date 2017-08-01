@@ -40,18 +40,17 @@ func (a *Api) Like (c echo.Context) error {
 
 func (a *Api) UnLike (c echo.Context) error {
 	currentUserId := GetUserIDFromToken(c)
-	userId,_ := strconv.Atoi(c.Param("user_id"))
 	postId,_ := strconv.Atoi(c.Param("post_id"))
 
-	if userId == 0 || postId == 0 || currentUserId != userId{
+	if postId == 0{
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Bad Request"}
 	}
 
-	isLiked := a.dataStorage.IsLiked(userId, postId)
+	isLiked := a.dataStorage.IsLiked(currentUserId, postId)
 	if !isLiked{
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Like not found"}
 	}
-	err := a.dataStorage.Unlike(userId, postId)
+	err := a.dataStorage.Unlike(currentUserId, postId)
 	if err != nil{
 		return err
 	}

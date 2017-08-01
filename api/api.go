@@ -46,7 +46,7 @@ func NewApi(bindAddress string, dbPath string) *Api {
 	g.DELETE("/posts/:id", a.DeletePost)
 
 	g.POST("/like", a.Like)
-	g.DELETE("/like/:user_id/:post_id", a.UnLike)
+	g.DELETE("/unlike/:post_id", a.UnLike)
 
 	a.bindAddress = bindAddress
 	return a
