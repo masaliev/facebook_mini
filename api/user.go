@@ -8,6 +8,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"github.com/masaliev/facebook_mini/db"
+	"os"
+	"io"
+	"fmt"
 )
 
 type(
@@ -93,6 +96,61 @@ func (a *Api) LoginTest(c echo.Context) error {
 	userId := GetUserIDFromToken(c)
 
 	return c.String(http.StatusOK, strconv.Itoa(userId))
+}
+
+func (a *Api) UploadPicture(c echo.Context) error {
+	userId := GetUserIDFromToken(c)
+
+	err, user := a.dataStorage.GetUserById(userId)
+	if err != nil{
+		return err
+	}
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	contentType := file.Header["Content-Type"][0]
+	if contentType != "image/jpeg" && contentType != "image/png"  && contentType != "image/gif"{
+		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "The file is not an image file"}
+	}
+
+	// Destination
+	fmt.Println(file.Header)
+	path := "/avatars/" + strconv.FormatInt(time.Now().Unix(),10) + "_" + file.Filename
+	dst, err := os.Create("public" + path)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	if user.Picture != ""{
+		os.Remove("public" + user.Picture)
+	}
+
+	user.Picture = path
+	err = a.dataStorage.UpdateUser(user)
+	if err != nil{
+		return err
+	}
+
+	token, err := createJWTToken(user)
+	if err == nil{
+		user.Token = token
+	}
+
+	return c.JSON(http.StatusOK, user)
 }
 
 func generatePasswordHash(password string) ([]byte, error){

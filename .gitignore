@@ -2,4 +2,5 @@ facebook_mini.iml
 .idea/
 facebook_mini.db
 facebook_mini
+public/avatars/**
 

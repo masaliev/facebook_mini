@@ -25,3 +25,9 @@ func (s *DataStorage) GetByPhone(phone string) (error, *User) {
 func (s *DataStorage) UpdateUser(user *User) error {
 	return meddler.Update(s.db, "users", user)
 }
+
+func (s *DataStorage) GetUserById(id int) (error, *User) {
+	user := &User{}
+	err := meddler.QueryRow(s.db, user, "SELECT * FROM users WHERE id = ?", id)
+	return err, user
+}

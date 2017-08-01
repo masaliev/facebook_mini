@@ -34,10 +34,13 @@ func NewApi(bindAddress string, dbPath string) *Api {
 		},
 	}))
 
+	a.echo.Static("/", "public")
+
 	g := a.echo.Group("/api/v1")
 
 	g.POST("/login", a.Login)
 	g.POST("/signup", a.SignUp)
+	g.POST("/upload-picture", a.UploadPicture)
 
 	g.GET("/posts", a.GetPosts)
 	g.GET("/posts/:id", a.GetPost)
