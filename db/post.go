@@ -16,6 +16,18 @@ type Post struct {
 	CreateDate time.Time `json:"create_date" meddler:"create_date,localtime"`
 }
 
+type PostVerbose struct {
+	ID int `json:"id" meddler:"id,pk"`
+	Text string `json:"text" meddler:"text"`
+	UserId int `json:"user_id" meddler:"user_id"`
+	UserName string `json:"user_name" meddler:"user_name"`
+	UserPicture string `json:"user_picture" meddler:"user_picture"`
+	CommentsCount int `json:"comments_count" meddler:"comments_count"`
+	LikeCount int `json:"like_count" meddler:"like_count"`
+	CreateDate time.Time `json:"create_date" meddler:"create_date,localtime"`
+	LikeId int `json:"like_id" meddler:"like_id"`
+}
+
 type PostSortType int
 
 const (
@@ -30,24 +42,26 @@ func (s *DataStorage) SavePost(post *Post) error  {
 	return meddler.Insert(s.db, "posts", post)
 }
 
-func (s *DataStorage) GetPosts(sort PostSortType, page int) (error, []*Post) {
-	query := "SELECT p.* FROM posts AS p";
+func (s *DataStorage) GetPosts(sort PostSortType, page int) (error, []*PostVerbose) {
+	query := "SELECT p.*, u.full_name AS user_name, u.picture AS user_picture, " +
+		"IFNULL((SELECT id FROM likes WHERE post_id = p.id LIMIT 1), 0) AS like_id " +
+		"FROM posts AS p LEFT JOIN users AS u ON p.user_id = u.id ";
 	switch sort {
 	case SortByCreateDate:
-		query += " ORDER BY create_date "
+		query += " ORDER BY p.create_date "
 		break
 	case SortByCommentsCount:
-		query += " ORDER BY comments_count DESC "
+		query += " ORDER BY p.comments_count DESC "
 		break
 	case SortByLikeCount:
-		query += " ORDER BY like_count DESC"
+		query += " ORDER BY p.like_count DESC"
 		break
 	}
 
 	query += " LIMIT " + strconv.Itoa(PostsPerPage)
 	query += " OFFSET " + strconv.Itoa( page - 1 * PostsPerPage)
 
-	posts := make([]*Post, 0)
+	posts := make([]*PostVerbose, 0)
 	err := meddler.QueryAll(s.db, &posts, query)
 	if err != nil {
 		return err, nil
