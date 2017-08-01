@@ -27,9 +27,9 @@ func (s *DataStorage) IsLiked(userId, postId int) bool {
 	}
 }
 
-func (s *DataStorage) Like(userId, postId int) (error, *Like ){
+func (s *DataStorage) Like(userId int, post *Post) (error, *Like ){
 	like := &Like{
-		PostId: postId,
+		PostId: post.ID,
 		UserId: userId,
 		CreateDate: time.Now(),
 	}
@@ -37,10 +37,21 @@ func (s *DataStorage) Like(userId, postId int) (error, *Like ){
 	if err != nil{
 		return err, nil
 	}
+
+	post.LikeCount++
+	s.SavePost(post)
+
 	return nil, like
 }
 
-func (s *DataStorage) Unlike(userId, postId int) error {
-	_, err := s.db.Exec("DELETE FROM likes WHERE user_id = ? AND post_id = ?", userId, postId)
+func (s *DataStorage) Unlike(userId int, post *Post) error {
+	_, err := s.db.Exec("DELETE FROM likes WHERE user_id = ? AND post_id = ?", userId, post.ID)
+	if err != nil{
+		return err
+	}
+
+	post.LikeCount--
+	s.SavePost(post)
+
 	return err
 }

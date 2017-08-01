@@ -3,36 +3,31 @@ package api
 import (
 	"github.com/labstack/echo"
 	"strconv"
-	"github.com/masaliev/facebook_mini/db"
 	"net/http"
 )
 
 func (a *Api) Like (c echo.Context) error {
 	userId := GetUserIDFromToken(c)
+	postId,_ := strconv.Atoi(c.FormValue("post_id"))
 
-	l := &db.Like{}
-	if err := c.Bind(l); err != nil{
-		return err
-	}
-
-	if l.UserId != userId{
+	if postId == 0{
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Bad Request"}
 	}
 
-	isLiked := a.dataStorage.IsLiked(l.UserId, l.PostId)
+	isLiked := a.dataStorage.IsLiked(userId, postId)
 
 	if isLiked{
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Allready liked"}
 	}
-	err, like := a.dataStorage.Like(l.UserId, l.PostId)
-	if err != nil{
-		return err
+
+	err, post := a.dataStorage.GetPostById(postId)
+	if err != nil || (post != nil && post.ID == 0){
+		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Post not found"}
 	}
 
-	err, post := a.dataStorage.GetPostById(l.PostId)
-	if err == nil{
-		post.LikeCount++
-		a.dataStorage.SavePost(post)
+	err, like := a.dataStorage.Like(userId, post)
+	if err != nil{
+		return err
 	}
 
 	return c.JSON(http.StatusOK, like)
@@ -50,15 +45,15 @@ func (a *Api) UnLike (c echo.Context) error {
 	if !isLiked{
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Like not found"}
 	}
-	err := a.dataStorage.Unlike(currentUserId, postId)
-	if err != nil{
-		return err
-	}
 
 	err, post := a.dataStorage.GetPostById(postId)
-	if err == nil{
-		post.LikeCount--
-		a.dataStorage.SavePost(post)
+	if err != nil || (post != nil && post.ID == 0){
+		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Post not found"}
+	}
+
+	err = a.dataStorage.Unlike(currentUserId, post)
+	if err != nil{
+		return err
 	}
 
 	return c.NoContent(http.StatusOK)
