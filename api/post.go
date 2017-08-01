@@ -42,6 +42,15 @@ func (a *Api) GetPosts(c echo.Context) error {
 	return c.JSON(http.StatusOK, posts)
 }
 
+func (a *Api) GetPost(c echo.Context) error {
+	postId,_ := strconv.Atoi(c.Param("id"))
+	err, post := a.dataStorage.GetPostDetailById(postId)
+	if err != nil{
+		return err
+	}
+	return c.JSON(http.StatusOK, post)
+}
+
 func (a *Api) CreatePost(c echo.Context) error {
 	userId := GetUserIDFromToken(c)
 

@@ -16,7 +16,7 @@ type Post struct {
 	CreateDate time.Time `json:"create_date" meddler:"create_date,localtime"`
 }
 
-type PostVerbose struct {
+type PostDetail struct {
 	ID int `json:"id" meddler:"id,pk"`
 	Text string `json:"text" meddler:"text"`
 	UserId int `json:"user_id" meddler:"user_id"`
@@ -46,7 +46,7 @@ func (s *DataStorage) SavePost(post *Post) error  {
 	}
 }
 
-func (s *DataStorage) GetPosts(sort PostSortType, page int) (error, []*PostVerbose) {
+func (s *DataStorage) GetPosts(sort PostSortType, page int) (error, []*PostDetail) {
 	query := "SELECT p.*, u.full_name AS user_name, u.picture AS user_picture, " +
 		"IFNULL((SELECT id FROM likes WHERE post_id = p.id LIMIT 1), 0) AS like_id " +
 		"FROM posts AS p LEFT JOIN users AS u ON p.user_id = u.id ";
@@ -65,7 +65,7 @@ func (s *DataStorage) GetPosts(sort PostSortType, page int) (error, []*PostVerbo
 	query += " LIMIT " + strconv.Itoa(PostsPerPage)
 	query += " OFFSET " + strconv.Itoa( page - 1 * PostsPerPage)
 
-	posts := make([]*PostVerbose, 0)
+	posts := make([]*PostDetail, 0)
 	err := meddler.QueryAll(s.db, &posts, query)
 	if err != nil {
 		return err, nil
@@ -82,6 +82,18 @@ func (s *DataStorage) DeletePost(post *Post) error {
 func (s *DataStorage) GetPostById(id int) (error, *Post) {
 	post := &Post{}
 	err := meddler.QueryRow(s.db, post, "SELECT * FROM posts WHERE id = ?", id)
+	if err != nil{
+		return err, nil
+	}
+	return nil, post
+}
+
+func (s *DataStorage) GetPostDetailById(id int) (error, *PostDetail) {
+	post := &PostDetail{}
+	query := "SELECT p.*, u.full_name AS user_name, u.picture AS user_picture, " +
+		"IFNULL((SELECT id FROM likes WHERE post_id = p.id LIMIT 1), 0) AS like_id " +
+		"FROM posts AS p LEFT JOIN users AS u ON p.user_id = u.id WHERE p.id = ?";
+	err := meddler.QueryRow(s.db, post, query, id)
 	if err != nil{
 		return err, nil
 	}
