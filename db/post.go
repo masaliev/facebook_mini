@@ -63,7 +63,7 @@ func (s *DataStorage) GetPosts(sort PostSortType, page int) (error, []*PostDetai
 	}
 
 	query += " LIMIT " + strconv.Itoa(PostsPerPage)
-	query += " OFFSET " + strconv.Itoa( page - 1 * PostsPerPage)
+	query += " OFFSET " + strconv.Itoa( (page - 1) * PostsPerPage)
 
 	posts := make([]*PostDetail, 0)
 	err := meddler.QueryAll(s.db, &posts, query)
