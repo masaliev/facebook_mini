@@ -37,7 +37,7 @@ func (a *Api) GetPosts(c echo.Context) error {
 	}
 	err, posts := a.dataStorage.GetPosts(sortType, page)
 	if err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: err.Error()}
+		return err
 	}
 	return c.JSON(http.StatusOK, posts)
 }
@@ -70,7 +70,7 @@ func (a *Api) CreatePost(c echo.Context) error {
 	}
 
 	if err := a.dataStorage.SavePost(post); err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 
 	return c.JSON(http.StatusCreated, post)
@@ -95,7 +95,7 @@ func (a *Api) UpdatePost(c echo.Context) error {
 
 	err, post := a.dataStorage.GetPostById(id)
 	if err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 	if post == nil || post.ID == 0{
 		return &echo.HTTPError{Code: http.StatusNotFound, Message: "Not found"}
@@ -108,7 +108,7 @@ func (a *Api) UpdatePost(c echo.Context) error {
 	post.Text = p.Text
 
 	if err := a.dataStorage.SavePost(post); err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 
 	return c.JSON(http.StatusOK, post)
@@ -124,7 +124,7 @@ func (a *Api) DeletePost(c echo.Context) error {
 
 	err, post := a.dataStorage.GetPostById(id)
 	if err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 	if post == nil || post.ID == 0{
 		return &echo.HTTPError{Code: http.StatusNotFound, Message: "Not found"}
@@ -135,7 +135,7 @@ func (a *Api) DeletePost(c echo.Context) error {
 	}
 
 	if err := a.dataStorage.DeletePost(post); err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 	return c.NoContent(http.StatusOK)
 }

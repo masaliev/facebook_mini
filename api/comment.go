@@ -82,7 +82,7 @@ func (a *Api) DeleteComment(c echo.Context) error {
 	}
 
 	if err := a.dataStorage.DeleteComment(comment); err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 	return c.NoContent(http.StatusOK)
 }

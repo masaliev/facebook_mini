@@ -42,7 +42,7 @@ func (a *Api) SignUp(c echo.Context) error {
 
 	password, err := generatePasswordHash(u.Password)
 	if err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 
 	user := &db.User{
@@ -52,12 +52,12 @@ func (a *Api) SignUp(c echo.Context) error {
 	}
 
 	if err := a.dataStorage.SaveUser(user); err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 
 	token, err := createJWTToken(user)
 	if err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 	user.Token = token
 
@@ -75,7 +75,10 @@ func (a *Api) Login(c echo.Context) error {
 	}
 
 	err, user := a.dataStorage.GetByPhone(u.Phone)
-	if err != nil || user.ID == 0{
+	if err != nil{
+		return err
+	}
+	if user == nil || user.ID == 0{
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message:"Invalid phone or password"}
 	}
 
@@ -85,7 +88,7 @@ func (a *Api) Login(c echo.Context) error {
 
 	token, err := createJWTToken(user)
 	if err != nil{
-		return &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Try again"}
+		return err
 	}
 	user.Token = token
 
