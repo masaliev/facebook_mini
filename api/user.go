@@ -10,14 +10,13 @@ import (
 	"github.com/masaliev/facebook_mini/db"
 	"os"
 	"io"
-	"fmt"
 )
 
 type(
 	User struct {
-		FullName string `json:"full_name,omitempty"`
-		Phone string `json:"phone"`
-		Password string `json:"password"`
+		FullName string `json:"full_name,omitempty" form:"full_name"`
+		Phone string `json:"phone" form:"phone"`
+		Password string `json:"password" form:"password"`
 	}
 )
 
@@ -125,7 +124,6 @@ func (a *Api) UploadPicture(c echo.Context) error {
 	}
 
 	// Destination
-	fmt.Println(file.Header)
 	path := "/avatars/" + strconv.FormatInt(time.Now().Unix(),10) + "_" + file.Filename
 	dst, err := os.Create("public" + path)
 	if err != nil {
