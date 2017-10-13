@@ -39,6 +39,11 @@ func (a *Api) SignUp(c echo.Context) error {
 		return &echo.HTTPError{Code: http.StatusBadRequest, Message: message}
 	}
 
+	_, checkUser := a.dataStorage.GetByPhone(u.Phone)
+	if checkUser != nil && checkUser.ID != 0{
+		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "Phone already exists"}
+	}
+
 	password, err := generatePasswordHash(u.Password)
 	if err != nil{
 		return err
